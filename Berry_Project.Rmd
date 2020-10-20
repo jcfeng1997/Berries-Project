@@ -1,0 +1,192 @@
+---
+title: "Berries Project"
+author: "Jiachen Feng"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(knitr)
+library(tidyverse)
+library(magrittr)
+library(kableExtra)
+
+
+## read the data
+
+ag_data <- read_csv("berries.csv", col_names = TRUE)
+
+```
+
+Get R environment ready and read the "Berries" data set.
+```{r}
+## look at number of unique values in each column
+ag_data %>% summarize_all(n_distinct) -> aa
+
+
+## make a list of the columns with only one unique value
+bb <- which(aa[1,]==1)
+
+## list the 1-unique valu column names 
+colnames(ag_data)[bb]
+
+## list the 1-unique single values.  
+## Consider if they should be used for labels
+
+single_values <- ag_data[1,bb]
+
+
+## remove the 1-unique columns from the dataset
+ag_data %<>% select(-all_of(bb))
+
+## look at number of unique values in each column
+ag_data %>% summarize_all(n_distinct) -> aa
+
+
+## make a list of the columns with only one unique value
+bb <- which(aa[1,]==1)
+
+## list the 1-unique valu column names 
+colnames(ag_data)[bb]
+
+## list the 1-unique single values.  
+## Consider if they should be used for labels
+
+single_values <- ag_data[1,bb]
+
+
+## remove the 1-unique columns from the dataset
+ag_data %<>% select(-all_of(bb))
+
+## Make a table of the number of unique values in each column.
+aa %<>% select(-all_of(bb)) 
+
+## State name and the State ANSI code are (sort of) redundant
+
+
+ag_data %<>% select(-4)
+aa %<>% select(-4) 
+
+
+ag_data$Year %>%  unique()
+## [1] 2019 2018 2017 2016 2015
+
+ag_data$Period %>% unique()
+## "MARKETING YEAR"      "YEAR"                "YEAR - AUG FORECAST"
+
+## Year: 
+## Generally refers to calendar year. 
+## For Prices Received data, refers to 
+##an unweighted average (by month) for the calendar year. 
+
+## Marketing year:
+## Definition varies by commodity; 
+## see Agricultural Prices publications
+## for definitions by commodity. 
+## For Prices Received data, refers to a
+## weighted average for the marketing year.
+```
+
+This process identifies columns without any data or with a single repeated Values, then remove those columns from the initial dataset.
+
+```{r}
+
+### let's focus on: period = "Year" and Commodity = "BLUEBERRIES"
+
+## blueberry data
+ag_data_bb <- ag_data %>% filter((Commodity=="BLUEBERRIES") & (Period=="YEAR"))
+
+ag_data_bb %<>% separate(`Data Item`, c("berry", "type", "data_item", "unit"), ",")
+
+ag_data_bb %<>% select(-c(Period,Commodity,berry))
+
+kable(head(ag_data_bb)) %>% kable_styling(font_size=12)
+  
+#######################################################
+
+### Then focus on: period = "Year" and Commodity = "strawberries"
+
+## Strawberry data
+ag_data_sb <- ag_data %>% filter((Commodity=="STRAWBERRIES") & (Period=="YEAR"))
+
+ag_data_sb %<>% separate(`Data Item`, c("berry", "type", "data_item", "unit"), ",")
+
+ag_data_sb %<>% select(-c(Period,Commodity,berry))
+
+kable(head(ag_data_sb)) %>% kable_styling(font_size=12)
+
+#######################################################
+
+### Also,period = "Year" and Commodity = "raspberries"
+
+## Raspberry data
+ag_data_rb <- ag_data %>% filter((Commodity=="RASPBERRIES") & (Period=="YEAR"))
+
+ag_data_rb %<>% separate(`Data Item`, c("berry", "type", "data_item", "unit"), ",")
+
+ag_data_rb %<>% select(-c(Period,Commodity,berry))
+
+kable(head(ag_data_rb)) %>% kable_styling(font_size=12)
+
+```
+This process divides the initial data set into three subsets to facilitate our classification research.
+
+
+
+The first part of this project mentioned above is about data cleaning. At first, I want to thank professor Wright for his help in completing this part of the project. Data cleaning, or data preparation is an essential part of statistical analysis. Based on personal experience of the data cleaning process, I find that it is more time-consuming than the statistical analysis itself. But this process is indispensable, for the reason that it ensures data can be deemed technically correct.
+
+To sum up, I believe data cleaning is a meaningful part of the whole statistical analysis process.
+
+
+
+```{r}
+##EDA
+
+summary(ag_data_bb)
+
+bbplot1 <- ggplot(ag_data_bb, aes(x = State, y = Domain))
+bbplot1 <- bbplot1 + geom_point() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 13, face = "bold")) +
+  labs(x = "State",y="Domain",title = "Blueberries")+
+  theme(plot.title = element_text(hjust = 0.5))
+bbplot1
+
+
+summary(ag_data_rb)
+
+rbplot1 <- ggplot(ag_data_rb, aes(x = State, y = Domain))
+rbplot1 <- rbplot1 + geom_point() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 13, face = "bold")) +
+  labs(x = "State",y="Domain",title = "Raspberries")+
+  theme(plot.title = element_text(hjust = 0.5))
+rbplot1
+
+summary(ag_data_sb)
+
+sbplot1 <- ggplot(ag_data_bb, aes(x = State, y = Domain))
+sbplot1 <- sbplot1 + geom_point() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 13, face = "bold")) +
+  labs(x = "State",y="Domain",title = "Strawberries")+
+  theme(plot.title = element_text(hjust = 0.5))
+sbplot1
+
+```
+The second part of this project is EDA. We can easily learn the basic information about the three datasets which are generated from the data cleaning part. Also, We can find from the plots which planting methods different states tend to adopt. Different varieties of berries may adopt a different domain category in planting.
+
+
+Reference:
+
+[1] Edwin de Jonge, Mark van der Loo. An introduction in data cleaning with R, 2013.
+
+[2] Hadley Wickham and Garrett Grolemund. R for Data Science. Import, Tidy, Transform, Visualize and Model Data, 2016.
+
+
