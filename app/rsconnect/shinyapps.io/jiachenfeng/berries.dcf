@@ -1,0 +1,12 @@
+name: berries
+title: berries
+username:
+account: jiachenfeng
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3405520
+bundleId: 3993957
+url: https://jiachenfeng.shinyapps.io/berries/
+when: 1608069840.13962
+asMultiple: FALSE
+asStatic: FALSE
